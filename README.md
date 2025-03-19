@@ -5,3 +5,6 @@ docker exec -it mysql-container mysql -uroot -p
 CREATE DATABASE test_db;
 SHOW DATABASES;
 
+# Run docker
+docker run --name myredis -d -p 6379:6379 redis
+

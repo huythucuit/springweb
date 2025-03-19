@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.RedisTemplate;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-
+    // Get user by ID
     public User getUserById(Long id) {
         String cacheKey = "user_" + id;
 
@@ -51,15 +50,16 @@ public class UserService {
         return user;
     }
 
-
+    // Create user
     public User createUser(User user) {
         return userRepository.save(user);
     }
 
+    // Delete User
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-
+    // Get user and pagination
     public List<UserDTO> getUsers(String name, Integer page, Integer size) {
         int pageNumber = (page != null && page > 0) ? page - 1 : 0; 
         int pageSize = (size != null && size > 0) ? size : 10; 
@@ -81,6 +81,31 @@ public class UserService {
 
         return userDTOs;
     }
+
+    // Update user
+    public User updateUser(Long id, User userDetails) {
+        User existingUser = userRepository.findById(id).orElse(null);
+        
+        if (existingUser == null) {
+            return null;
+        }
+        
+        // Update user fields
+        existingUser.setName(userDetails.getName());
+        existingUser.setEmail(userDetails.getEmail());
+        // Update other fields as needed
+        
+        // Save updated user
+        User updatedUser = userRepository.save(existingUser);
+        
+        // Update cache
+        String cacheKey = "user_" + id;
+        redisTemplate.opsForValue().set(cacheKey, updatedUser, 10, TimeUnit.MINUTES);
+        
+        return updatedUser;
+    }
+    
+    // Function for Redis
     public void saveToCache(String key, Object value) {
         redisTemplate.opsForValue().set(key, value, 10, TimeUnit.MINUTES); // Cache 10 phút
     }
