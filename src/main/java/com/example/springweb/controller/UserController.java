@@ -2,8 +2,10 @@ package com.example.springweb.controller;
 
 import com.example.springweb.model.User;
 import com.example.springweb.service.UserService;
+import com.example.springweb.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,16 +21,15 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
+    // @GetMapping
+    // public List<User> getAllUsers() {
+    //     return userService.getAllUsers();
+    // }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        User user = userService.getUserById(id);
+        return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
@@ -41,4 +42,14 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping
+    public List<UserDTO> getUsers(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) Integer page,
+        @RequestParam(required = false) Integer size
+    ) {
+        return userService.getUsers(name, page, size);
+    }
+
 }
